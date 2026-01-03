@@ -6,6 +6,16 @@ final class SystemUIHelper {
 
     /// Opens the macOS Notification Center
     static func openNotificationCenter() {
+        // Check for Accessibility permission first
+        let trusted = AXIsProcessTrustedWithOptions(
+            [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+        )
+
+        guard trusted else {
+            // System will show the prompt automatically
+            return
+        }
+
         let script = """
             tell application "System Events"
                 tell process "ControlCenter"

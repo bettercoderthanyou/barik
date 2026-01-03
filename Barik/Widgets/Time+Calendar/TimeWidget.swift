@@ -61,8 +61,6 @@ struct TimeWidget: View {
             switch clickAction {
             case "notification-center":
                 SystemUIHelper.openNotificationCenter()
-            case "calendar":
-                fallthrough
             default:
                 MenuBarPopup.show(rect: rect, id: "calendar") {
                     CalendarPopup(
