@@ -74,7 +74,7 @@ class MenuBarPopup {
                 panel.contentView = NSHostingView(
                     rootView:
                         ZStack {
-                            MenuBarPopupView {
+                            MenuBarPopupView(widgetRect: rect) {
                                 content()
                             }
                             .position(x: rect.midX)
@@ -92,7 +92,7 @@ class MenuBarPopup {
             panel.contentView = NSHostingView(
                 rootView:
                     ZStack {
-                        MenuBarPopupView {
+                        MenuBarPopupView(widgetRect: rect) {
                             content()
                         }
                         .position(x: rect.midX)

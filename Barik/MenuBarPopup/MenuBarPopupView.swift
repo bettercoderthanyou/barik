@@ -3,9 +3,9 @@ import SwiftUI
 struct MenuBarPopupView<Content: View>: View {
     let content: Content
     let isPreview: Bool
+    let widgetRect: CGRect
 
     @ObservedObject var configManager = ConfigManager.shared
-    var foregroundHeight: CGFloat { configManager.config.experimental.foreground.resolveHeight() }
 
     @State private var contentHeight: CGFloat = 0
     @State private var viewFrame: CGRect = .zero
@@ -21,7 +21,8 @@ struct MenuBarPopupView<Content: View>: View {
     private let willChangeContent = NotificationCenter.default.publisher(
         for: .willChangeContent)
 
-    init(isPreview: Bool = false, @ViewBuilder content: () -> Content) {
+    init(widgetRect: CGRect = .zero, isPreview: Bool = false, @ViewBuilder content: () -> Content) {
+        self.widgetRect = widgetRect
         self.content = content()
         self.isPreview = isPreview
         if isPreview {
@@ -29,12 +30,18 @@ struct MenuBarPopupView<Content: View>: View {
         }
     }
 
+    // Position popup just below the widget
+    // Simply use widgetRect.maxY (bottom of widget in SwiftUI coords) + small gap
+    var popupTopPosition: CGFloat {
+        return widgetRect.maxY + 5
+    }
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             content
                 .background(Color.black)
                 .cornerRadius(((1.0 - animationValue) * 1) + 40)
-                .padding(.top, foregroundHeight + 5)
+                .padding(.top, popupTopPosition)
                 .offset(x: computedOffset, y: computedYOffset)
                 .shadow(radius: 30)
                 .blur(radius: (1.0 - (0.1 + 0.9 * animationValue)) * 20)
