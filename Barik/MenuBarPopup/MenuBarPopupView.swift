@@ -6,6 +6,7 @@ struct MenuBarPopupView<Content: View>: View {
     let widgetRect: CGRect
 
     @ObservedObject var configManager = ConfigManager.shared
+    var foregroundHeight: CGFloat { configManager.config.experimental.foreground.resolveHeight() }
 
     @State private var contentHeight: CGFloat = 0
     @State private var viewFrame: CGRect = .zero
@@ -30,10 +31,9 @@ struct MenuBarPopupView<Content: View>: View {
         }
     }
 
-    // Position popup just below the widget
-    // Simply use widgetRect.maxY (bottom of widget in SwiftUI coords) + small gap
+    // Position popup just below the menu bar
     var popupTopPosition: CGFloat {
-        return widgetRect.maxY + 5
+        return foregroundHeight + 52
     }
 
     var body: some View {
@@ -41,11 +41,10 @@ struct MenuBarPopupView<Content: View>: View {
             content
                 .background(Color.black)
                 .cornerRadius(((1.0 - animationValue) * 1) + 40)
-                .padding(.top, popupTopPosition)
-                .offset(x: computedOffset, y: computedYOffset)
                 .shadow(radius: 30)
                 .blur(radius: (1.0 - (0.1 + 0.9 * animationValue)) * 20)
-                .scaleEffect(x: 0.2 + 0.8 * animationValue, y: animationValue)
+                .scaleEffect(x: 0.2 + 0.8 * animationValue, y: animationValue, anchor: .top)
+                .offset(x: computedOffset, y: popupTopPosition)
                 .opacity(animationValue)
                 .transaction { transaction in
                     if isHideAnimation {
