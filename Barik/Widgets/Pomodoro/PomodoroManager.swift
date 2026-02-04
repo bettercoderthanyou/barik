@@ -29,6 +29,8 @@ class PomodoroManager: ObservableObject {
     @Published var completedSessions: Int = 0
     @Published var isPaused: Bool = false
 
+    @Published var showTimerText: Bool = false
+
     @Published var workDuration: Int = 25
     @Published var breakDuration: Int = 5
     @Published var longBreakDuration: Int = 15
