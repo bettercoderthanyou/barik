@@ -1,8 +1,10 @@
 import SwiftUI
+import UserNotifications
 
 struct PomodoroPopup: View {
     @ObservedObject private var manager = PomodoroManager.shared
     @State private var showSettings = false
+    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
 
     var body: some View {
         VStack(spacing: 16) {
@@ -111,8 +113,57 @@ struct PomodoroPopup: View {
             durationStepper("Break", value: $manager.breakDuration, range: 1...30)
             durationStepper("Long Break", value: $manager.longBreakDuration, range: 1...60)
             durationStepper("Sessions", value: $manager.sessionsBeforeLongBreak, range: 1...10)
+
+            Divider()
+                .background(Color.gray.opacity(0.3))
+
+            HStack {
+                Text("Show timer")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.gray)
+                Spacer()
+                Toggle("", isOn: $manager.showTimerText)
+                    .toggleStyle(.switch)
+                    .controlSize(.mini)
+            }
+
+            if notificationStatus != .authorized {
+                Divider()
+                    .background(Color.gray.opacity(0.3))
+
+                Button {
+                    if notificationStatus == .notDetermined {
+                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
+                            DispatchQueue.main.async {
+                                notificationStatus = granted ? .authorized : .denied
+                            }
+                        }
+                    } else {
+                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: notificationStatus == .denied ? "bell.slash" : "bell.badge")
+                            .font(.system(size: 10))
+                        Text(notificationStatus == .denied ? "Open Settings" : "Enable Notifications")
+                            .font(.system(size: 11))
+                    }
+                    .foregroundStyle(notificationStatus == .denied ? .orange : .blue)
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+            }
         }
         .frame(width: 160)
+        .onAppear {
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                DispatchQueue.main.async {
+                    notificationStatus = settings.authorizationStatus
+                }
+            }
+        }
     }
 
     private var phaseColor: Color {
